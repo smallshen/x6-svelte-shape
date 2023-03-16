@@ -2,7 +2,7 @@
 
 <script lang="ts">
     import type { Node } from "@antv/x6"
-    import type { ComponentType } from "svelte"
+    import { onDestroy, type ComponentType } from "svelte"
 
     export let component: ComponentType
 
@@ -12,18 +12,26 @@
     let height: number
     $: node.size(width, height)
 
-    node.on("change:size", () => {
+    const updateSize = () => {
         width = node.size().width
         height = node.size().height
-    })
+    }
+
+    node.on("change:size", updateSize)
 
     let posX: number
     let posY: number
     $: node.position(posX, posY)
 
-    node.on("change:position", () => {
+    const updatePos = () => {
         posX = node.position().x
         posY = node.position().y
+    }
+    node.on("change:position", updatePos)
+
+    onDestroy(() => {
+        node.off("change:size", updateSize)
+        node.off("change:position", updatePos)
     })
 </script>
 
